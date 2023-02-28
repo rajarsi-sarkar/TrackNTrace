@@ -1,27 +1,33 @@
-Tracking any system involves 
-- building a context from different unrelated events & 
-- drawing inference from
+# Tracking UseCase #
 
-In this demo simulation, a baggage state/context is built from considering the following disparate events
-- Checkouts, 											emanating from a checkout processing system
-- RFIDs,                          emanating from sensors as bags move about prior to loading & after unloading
-- Flight arrivals & departures,   emanating from a flight monitoring system,
-to detect bags, that miss flights carrying the affected passengers, and notify airlines for proactive action taking
+Tracking a system involves 
+* building a rich context, by
+  * mixing the system's events with other relevant ones
+  * churning them through the process of correlation, transformation and stateful processing &
+* drawing distilled inferences thereof..
 
-(What)
-This demo aims to detect bags, that miss flights carrying the affected passengers, and notify airlines for proactive action taking
-(How)
-It build a baggage state/context from considering the following disparate events
-- Checkouts, 											emanating from a checkout processing system
-- RFIDs,                          emanating from sensors as bags move about prior to loading & after unloading
-- Flight arrivals & departures,   emanating from a flight monitoring system,
-(Why)
-to detect bags, that miss flights carrying the affected passengers, and 
-notify airlines for remedial actions proactively. 
+<img width="1134" alt="Screen Shot 2023-02-28 at 9 46 58 AM" src="https://user-images.githubusercontent.com/107064168/221904812-b498f288-12af-4e40-89d1-a754e01dfc91.png">
 
-<img width="874" alt="Screen Shot 2023-02-27 at 3 18 11 PM" src="https://user-images.githubusercontent.com/107064168/221687952-fcbb5ba8-4464-4303-beff-a25f49913b74.png">
+*WHAT?*
 
-1. @ checkin, the passenger's luggages get stored in IMDG in denormalized form, for processing speed. LuggageStateStore, that gets created alongwith, gets incrementally updated across the different event streams & provides a consolidated view of a passenger's luggages (tracked by his/her ticket) until conclusion of his/her journey.
-2. @ sensor tracking, enroute to the flight or baggage claim or transfers. Its a skinny event carrying only a tagId on it. Its gets enriched multiple times, so it can be correctly correlated to the passenger (by the ticket) and his/her luggage status continuously updated.
-3. @ flight departure, HZ-Platform is queried for all bags with OnSchedule status set to false to detect missed bags if any.
-The missed bags along with necessary passenger info can be published internally as notifications for proactive remediation.    
+The demo aims to track baggages @ airport until completion of the journey. 
+
+*HOW?*
+
+A baggage state/context is built from the following disparate events for detecting bags missing the flights that carry the affected passengers. 
+
+Events          | Source
+-------------   | -------------
+Checkouts       | emanating from a checkout processing system
+RFIDs           | emanating from sensors as bags move about prior to loading & after unloading
+Flight arrivals | emanating from a flight monitoring system
+
+*WHY?*
+
+By proactively detecting missed events, precious time can be bought for fast remedial actions & mitigating situations.
+
+<img width="1361" alt="Screen Shot 2023-02-28 at 11 18 46 AM" src="https://user-images.githubusercontent.com/107064168/221928648-d1630a11-e604-4113-bd67-3e4e2847d63d.png">
+
+1. @ post-checkin: From the checkin event, a passenger's luggage event is created & stored in data-store (denormalized form). A LuggageState, is also created alongside, that gets incrementally updated across the different event streams throughout the journey & provides a consolidated view of the passenger (represented here as his/her baggages & tracked by his/her ticket) until conclusion of the journey.
+2. @ sensor tracking: Enroute to the flight or baggage area or transfers, sesors monitor the bags by reading tags & sending out RFIDs. RFIDs are skinny events carrying just a tagId. It gets enriched many times within the system so correct correlation can be applied for building up the context for every passenger (ticket) on the journey.
+3. @ flight departure: When the flight departs, the depart event queries HZ-storage for all bags that didn't make the flight.The missed bags along with necessary ticket info are published out for proactive remediation & mitigation.    
